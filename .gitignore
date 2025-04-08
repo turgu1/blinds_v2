@@ -1,2 +1,5 @@
-secrets.yaml
-secrets_robert.yaml
+/.esphome
+/secrets.yaml
+/secrets_robert.yaml
+/components/blinds_command/__pycache__
+/.vscode

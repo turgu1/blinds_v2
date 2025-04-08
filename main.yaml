@@ -1,10 +1,11 @@
 substitutions:
-  name: blinds_v2
+  name: "blinds_v2"
   friendly_name: "Blinds V2"
-  #board: lolin_s2_mini
-  #board: esp32dev
-  board: esp32doit-devkit-v1
-  rf_gpio: 21
+  board: "lolin_s2_mini"
+  #board: "esp32dev"
+  #board: "esp32doit-devkit-v1"
+  rf_gpio: "21"
+  #rf_gpio: "18"
 
 esphome:
   name: ${name}
@@ -14,15 +15,22 @@ esphome:
   platformio_options:
     board_build.flash_mode: dio
   project:
-    name: blinds_v2
+    name: blinds_v2.local
     version: 0.1.0
-    version: dev
 
 esp32:
   board: ${board}
   framework:
-    type: espidf
-    version: 5.4.1
+    type: esp-idf
+    version: recommended
+
+external_components:
+  source: 
+    path: components
+    type: local
+
+blinds_command:
+  id: command
 
 # Enable logging
 logger:
@@ -56,8 +64,12 @@ mqtt:
       topic: !secret mqtt_command_topic
       qos: 0
       then:
-        - remote_transmitter.transmit_raw:
-            code: !lambda 'return (std::vector<uint16_t>){0x0000, 0x0000};'
+        - if:
+            condition:
+              lambda: 'return command->decode_cmd(x);'
+            then:
+              - remote_transmitter.transmit_raw:
+                  code: !lambda 'return command->emit_cmd();'
 
 
 # Allow provisioning Wi-Fi via serial
