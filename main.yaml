@@ -1,0 +1,90 @@
+substitutions:
+  name: blinds_v2
+  friendly_name: "Blinds V2"
+  #board: lolin_s2_mini
+  #board: esp32dev
+  board: esp32doit-devkit-v1
+  rf_gpio: 21
+
+esphome:
+  name: ${name}
+  friendly_name: ${friendly_name}
+  min_version: 2025.2.0
+  name_add_mac_suffix: false
+  platformio_options:
+    board_build.flash_mode: dio
+  project:
+    name: blinds_v2
+    version: 0.1.0
+    version: dev
+
+esp32:
+  board: ${board}
+  framework:
+    type: espidf
+    version: 5.4.1
+
+# Enable logging
+logger:
+  level: WARN
+  
+# Enable Home Assistant API and failsafe mechanisms
+api:
+  reboot_timeout: 0s
+  
+# Allow Over-The-Air updates
+ota:
+- platform: esphome
+
+web_server:
+  port: 80
+  version: 3
+
+mqtt:
+  enable_on_boot: true
+  reboot_timeout: 0s    # Will not reboot if MQTT server is not available
+  broker: !secret mqtt_address
+  username: !secret mqtt_username
+  password: !secret mqtt_password
+  client_id: !secret mqtt_client_id
+  topic_prefix: !secret mqtt_topic_prefix
+  log_topic: !secret mqtt_log_topic
+  discovery: false
+  discover_ip: false
+  discovery_retain: false
+  on_message:
+      topic: !secret mqtt_command_topic
+      qos: 0
+      then:
+        - remote_transmitter.transmit_raw:
+            code: !lambda 'return (std::vector<uint16_t>){0x0000, 0x0000};'
+
+
+# Allow provisioning Wi-Fi via serial
+improv_serial:
+
+wifi:
+  ssid: !secret wifi_sta_ssid
+  password: !secret wifi_sta_password
+  reboot_timeout: 0s
+  
+  ap:
+    ssid: !secret wifi_ap_ssid
+    password: !secret wifi_ap_password
+    ap_timeout: 10s
+
+    manual_ip:
+      static_ip: 192.168.10.1
+      gateway: 192.168.10.1
+      subnet: 255.255.255.0
+  
+dashboard_import:
+  package_import_url: github://esphome/firmware/esphome-web/esp32s2.yaml@main
+  import_full_config: true
+
+debug:
+  update_interval: 5s
+
+remote_transmitter:
+  pin: ${rf_gpio}
+  carrier_duty_percent: 100%
