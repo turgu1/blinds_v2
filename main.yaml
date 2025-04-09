@@ -1,5 +1,5 @@
 substitutions:
-  name: "blinds_v2"
+  name: "blindsv2"
   friendly_name: "Blinds V2"
   board: "lolin_s2_mini"
   #board: "esp32dev"
@@ -34,7 +34,7 @@ blinds_command:
 
 # Enable logging
 logger:
-  level: WARN
+  level: INFO
   
 # Enable Home Assistant API and failsafe mechanisms
 api:
@@ -47,6 +47,10 @@ ota:
 web_server:
   port: 80
   version: 3
+  sorting_groups:
+    - id: sorting_group_settings
+      name: "Settings"
+      sorting_weight: 10
 
 mqtt:
   enable_on_boot: true
@@ -64,12 +68,17 @@ mqtt:
       topic: !secret mqtt_command_topic
       qos: 0
       then:
+        - logger.log:
+            level: INFO
+            format: "Received command: %s"
+            args: ['x.c_str()']
         - if:
             condition:
               lambda: 'return command->decode_cmd(x);'
             then:
               - remote_transmitter.transmit_raw:
                   code: !lambda 'return command->emit_cmd();'
+                  repeat: 1
 
 
 # Allow provisioning Wi-Fi via serial

@@ -53,12 +53,15 @@ auto BlindsCommand::decode_cmd(std::string msg) -> bool {
     ch++;
   }
   while (*ch == ' ') ch++;
+
+  ESP_LOGI(TAG, "Command: %s, Id: %d", cmd_str, id);
+
+  // Retrieve channels
+
   if (*ch != ',') {
     ESP_LOGE(TAG, "No channel present: %s", msg.c_str());
     return false;
   }
-
-  // Retrieve channels
 
   channel_count = 0;
   while ((*ch == ',') && (channel_count < 10)) {
@@ -76,6 +79,8 @@ auto BlindsCommand::decode_cmd(std::string msg) -> bool {
   if (channel_count == 0) {
     ESP_LOGE(TAG, "No channel present: %s", msg.c_str());
     return false;
+  } else {
+    ESP_LOGI(TAG, "Channels Count: %d", channel_count);
   }
 
   while (*ch == ' ') ch++;
