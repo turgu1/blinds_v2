@@ -31,5 +31,5 @@ Once received, the controller will compute the message checksum and send the cod
 
 The controller offers a web interface access to it's logging output on the standard HTTP port 80. For example, you first need to find the IP address or DNS name of the device from your router and use one of the following addresses in your browser:
 
-- `http://10.0.0.133` (her is an example IP address)
+- `http://10.0.0.133` (here is an example IP address)
 - `http://blindsv2.local` (default DNS address)
